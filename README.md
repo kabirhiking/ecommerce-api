@@ -139,14 +139,15 @@ DATABASE_URL=sqlite:///./ecommerce.db
 SECRET_KEY=your_jwt_secret
 ````
 
----
+
 
 ## Screenshots
 
 ![alt text](image/shot.png)
 
 
----
+
+
 
 ---
 
