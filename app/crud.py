@@ -14,6 +14,24 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
+
+
+def get_all_users(db: Session):
+    return db.query(models.User).all()
+
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
+def delete_user(db: Session, user_id: int):
+    db_user = get_user_by_id(db, user_id)
+    if not db_user:
+        return False
+    db.delete(db_user)
+    db.commit()
+    return True
+
+
+
 # Product
 def create_product(db: Session, product: schemas.ProductCreate):
     db_product = models.Product(**product.dict())
