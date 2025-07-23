@@ -1,8 +1,8 @@
 
 
-````markdown
-## 🛒 E-Commerce API with FastAPI
 
+## 🛒 E-Commerce API with FastAPI
+````markdown
 A simple e-commerce backend built using **FastAPI**, **SQLAlchemy**, and **JWT authentication**. Includes core features like user registration, product management, cart handling, and order placement.
 
 ---
@@ -139,17 +139,14 @@ DATABASE_URL=sqlite:///./ecommerce.db
 SECRET_KEY=your_jwt_secret
 ````
 
-
+---
 
 ## Screenshots
 
-<p align="center">
-  <img src="image/shot.png" alt="App Screenshot" width="600"/>
-</p>
-
-<!-- ![alt text](image/shot.png) -->
+![alt text](image/shot.png)
 
 
+---
 
 ---
 
