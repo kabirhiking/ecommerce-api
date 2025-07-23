@@ -52,7 +52,10 @@ A simple e-commerce backend built using **FastAPI**, **SQLAlchemy**, and **JWT a
     ```bash
     uvicorn app.main:app --reload
     ```
-
+5. **Access the Swagger UI and ReDoc:
+    ```bash
+    Swagger UI: http://127.0.0.1:8000/docs/
+    ```
 ---
 
 ## 📁 Project Structure
