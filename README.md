@@ -142,10 +142,8 @@ SECRET_KEY=your_jwt_secret
 
 
 ## Screenshots
-
 ![alt text](image/shot.png)
-
-
+##
 
 
 
