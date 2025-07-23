@@ -141,6 +141,14 @@ SECRET_KEY=your_jwt_secret
 
 ---
 
+## Screenshots
+
+![alt text](image.png)
+
+---
+
+---
+
 ## 🛠 Tech Stack
 
 * FastAPI
