@@ -142,8 +142,12 @@ SECRET_KEY=your_jwt_secret
 
 
 ## Screenshots
-![alt text](image/shot.png)
-##
+
+<p align="center">
+  <img src="image/shot.png" alt="App Screenshot" width="600"/>
+</p>
+
+<!-- ![alt text](image/shot.png) -->
 
 
 
