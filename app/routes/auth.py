@@ -16,8 +16,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = crud.get_user_by_username(db, user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already exists")
-    user.hashed_password = auth.hash_password(user.password)
-    return crud.create_user(db, user)
+    hashed_password = auth.hash_password(user.password)
+    return crud.create_user(db, user, hashed_password)
 
 #  Login user
 @router.post("/login")
