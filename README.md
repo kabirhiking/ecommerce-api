@@ -1,5 +1,7 @@
 
 
+🚀 **Live API Docs**: [https://web-production-c09a8.up.railway.app/docs](https://web-production-c09a8.up.railway.app/docs)
+
 
 ## 🛒 E-Commerce API with FastAPI
 ````markdown
