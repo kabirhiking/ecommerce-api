@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Image Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product Image Upload Test</h1>
+    
+    <h2>Method 1: Create Product with Image</h2>
+    <form id="createProductForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Product Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="image">Product Image:</label>
+            <input type="file" id="image" name="image" accept="image/*">
+        </div>
+        
+        <button type="submit">Create Product</button>
+    </form>
+    
+    <div id="createResult"></div>
+    
+    <hr style="margin: 40px 0;">
+    
+    <h2>Method 2: Upload Image Only</h2>
+    <form id="uploadImageForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="imageOnly">Image File:</label>
+            <input type="file" id="imageOnly" name="file" accept="image/*" required>
+        </div>
+        
+        <button type="submit">Upload Image</button>
+    </form>
+    
+    <div id="uploadResult"></div>
+
+    <script>
+        // Create product with image
+        document.getElementById('createProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('createResult');
+            
+            try {
+                const response = await fetch('http://localhost:8000/products/with-image/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>Product created successfully!</h3>
+                            <p><strong>ID:</strong> ${result.id}</p>
+                            <p><strong>Name:</strong> ${result.name}</p>
+                            <p><strong>Price:</strong> $${result.price}</p>
+                            ${result.image ? `<p><strong>Image URL:</strong> <a href="http://localhost:8000${result.image}" target="_blank">${result.image}</a></p>` : ''}
+                            ${result.image ? `<img src="http://localhost:8000${result.image}" alt="${result.name}" style="max-width: 200px; margin-top: 10px;">` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">Error: ${result.detail}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+            }
+        });
+        
+        // Upload image only
+        document.getElementById('uploadImageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('uploadResult');
+            
+            try {
+                const response = await fetch('http://localhost:8000/uploads/product-image/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>Image uploaded successfully!</h3>
+                            <p><strong>Filename:</strong> ${result.filename}</p>
+                            <p><strong>URL:</strong> <a href="http://localhost:8000${result.url}" target="_blank">${result.url}</a></p>
+                            <p><strong>Size:</strong> ${result.size} bytes</p>
+                            <img src="http://localhost:8000${result.url}" alt="Uploaded image" style="max-width: 200px; margin-top: 10px;">
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">Error: ${result.detail}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

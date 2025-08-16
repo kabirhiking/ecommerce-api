@@ -27,3 +27,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+#  Get current user
+@router.get("/me", response_model=schemas.UserOut)
+def get_current_user(current_username: str = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_username(db, current_username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
