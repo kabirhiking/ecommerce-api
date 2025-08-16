@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app import schemas, crud, database, auth
+from app import schemas, crud, database, auth, models
 from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
@@ -30,8 +30,5 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 #  Get current user
 @router.get("/me", response_model=schemas.UserOut)
-def get_current_user(current_username: str = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
-    user = crud.get_user_by_username(db, current_username)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+def get_current_user_info(current_user: models.User = Depends(auth.get_current_user)):
+    return current_user

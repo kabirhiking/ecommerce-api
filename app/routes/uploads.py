@@ -50,8 +50,8 @@ async def upload_product_image(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         buffer.write(file_content)
     
-    # Return the URL path
-    file_url = f"/uploads/products/{unique_filename}"
+    # Return the URL path (using /static prefix since that's how it's mounted in main.py)
+    file_url = f"/static/products/{unique_filename}"
     
     return {
         "filename": unique_filename,
