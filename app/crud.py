@@ -48,11 +48,25 @@ def get_all_products(db: Session):
 
 # Cart
 def add_to_cart(db: Session, user_id: int, item: schemas.CartItemCreate):
-    db_item = models.CartItem(user_id=user_id, product_id=item.product_id, quantity=item.quantity)
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
+    # Check if product already exists in cart
+    existing_item = db.query(models.CartItem).filter(
+        models.CartItem.user_id == user_id,
+        models.CartItem.product_id == item.product_id
+    ).first()
+    
+    if existing_item:
+        # Update quantity if item already exists
+        existing_item.quantity += item.quantity
+        db.commit()
+        db.refresh(existing_item)
+        return existing_item
+    else:
+        # Create new cart item if it doesn't exist
+        db_item = models.CartItem(user_id=user_id, product_id=item.product_id, quantity=item.quantity)
+        db.add(db_item)
+        db.commit()
+        db.refresh(db_item)
+        return db_item
 
 def get_cart_items(db: Session, user_id: int):
     return db.query(models.CartItem).filter(models.CartItem.user_id == user_id).all()
@@ -65,16 +79,54 @@ def remove_cart_item(db: Session, cart_item_id: int):
     db.commit()
     return True
 
+def update_cart_item_quantity(db: Session, cart_item_id: int, quantity: int):
+    db_item = db.query(models.CartItem).filter(models.CartItem.id == cart_item_id).first()
+    if not db_item:
+        return None
+    if quantity <= 0:
+        # Remove item if quantity is 0 or negative
+        db.delete(db_item)
+        db.commit()
+        return None
+    else:
+        db_item.quantity = quantity
+        db.commit()
+        db.refresh(db_item)
+        return db_item
+
+def clear_cart(db: Session, user_id: int):
+    db.query(models.CartItem).filter(models.CartItem.user_id == user_id).delete()
+    db.commit()
+    return True
+
 
 # Order
-def create_order(db: Session, user_id: int, total_price: float):
-    db_order = models.Order(user_id=user_id, total_price=total_price)
+def create_order(db: Session, user_id: int, order_data: schemas.OrderCreate):
+    # Create the order
+    db_order = models.Order(user_id=user_id, total_price=order_data.total_price)
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
+    
+    # Create order items
+    for item in order_data.items:
+        db_order_item = models.OrderItem(
+            order_id=db_order.id,
+            product_id=item.product_id,
+            quantity=item.quantity,
+            price=item.price
+        )
+        db.add(db_order_item)
+    
+    db.commit()
+    db.refresh(db_order)
     return db_order
+
 def get_all_orders(db: Session):
     return db.query(models.Order).all()
+
+def get_user_orders(db: Session, user_id: int):
+    return db.query(models.Order).filter(models.Order.user_id == user_id).all()
 
 
 

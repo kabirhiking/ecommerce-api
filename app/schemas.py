@@ -23,6 +23,7 @@ class ProductCreate(BaseModel):
     description: str
     price: float
     quantity: int
+    image: Optional[str] = None
 
 class ProductOut(ProductCreate):
     id: int
@@ -32,16 +33,33 @@ class ProductOut(ProductCreate):
 
         
 # Order schemas
+class OrderItem(BaseModel):
+    product_id: int
+    quantity: int
+    price: float
+
+class OrderItemOut(BaseModel):
+    id: int
+    product_id: int
+    quantity: int
+    price: float
+    product: ProductOut
+    
+    class Config:
+        from_attributes = True
+
 class OrderCreate(BaseModel):
-    user_id: int
     total_price: float
+    items: Optional[List[OrderItem]] = []
 
 class OrderOut(BaseModel):
     id: int
     total_price: float
+    user_id: int
+    order_items: List[OrderItemOut] = []
     
     class Config:
-     from_attributes = True
+        from_attributes = True
 
         
 # Cart schemas
