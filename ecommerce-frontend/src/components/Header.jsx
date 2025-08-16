@@ -67,7 +67,7 @@ export default function Header() {
               to="/" 
               className={`text-sm lg:text-base xl:text-lg font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
                 isActive('/') 
-                  ? 'text-indigo-600 bg-indigo-50' 
+                  ? 'text-gray-600 bg-indigo-50' 
                   : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
               }`}
             >
@@ -106,6 +106,16 @@ export default function Header() {
                   }`}
                 >
                   Orders
+                </Link>
+                <Link 
+                  to="/about" 
+                  className={`text-sm lg:text-base xl:text-lg font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                    isActive('/about') 
+                      ? 'text-indigo-600 bg-indigo-50' 
+                      : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                  }`}
+                >
+                  About Us
                 </Link>
               </>
             )}
