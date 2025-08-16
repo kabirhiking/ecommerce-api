@@ -31,19 +31,23 @@ export const CartProvider = ({ children }) => {
   const loadCartFromBackend = async () => {
     try {
       const response = await api.get('/cart/')
-      // Deduplicate items based on product ID
+      console.log('Loading cart from backend:', response.data)
+      
+      // Remove duplicates on frontend as a safety measure
       const deduplicatedItems = response.data.reduce((acc, item) => {
-        const productId = item.product?.id || item.id
+        const productId = item.product?.id || item.product_id
         const existingIndex = acc.findIndex(existing => {
-          const existingProductId = existing.product?.id || existing.id
+          const existingProductId = existing.product?.id || existing.product_id
           return existingProductId === productId
         })
         
         if (existingIndex >= 0) {
           // Merge quantities if duplicate found
           acc[existingIndex].quantity += item.quantity
+          console.log(`Merged duplicate item for product ${productId}, new quantity: ${acc[existingIndex].quantity}`)
         } else {
           acc.push(item)
+          console.log(`Added item for product ${productId}, quantity: ${item.quantity}`)
         }
         return acc
       }, [])
@@ -55,13 +59,16 @@ export const CartProvider = ({ children }) => {
   }
 
   const addToCart = async (product) => {
+    console.log('Adding to cart:', product.id, 'Current cart items:', cartItems.length)
+    
     if (user) {
       // Add to backend cart
       try {
-        await api.post('/cart/add', {
+        const response = await api.post('/cart/add', {
           product_id: product.id,
           quantity: 1
         })
+        console.log('Backend add response:', response.data)
         await loadCartFromBackend() // Refresh cart
       } catch (error) {
         console.error('Error adding to backend cart:', error)

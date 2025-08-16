@@ -7,6 +7,13 @@ export default function Cart() {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useContext(CartContext)
   const { user } = useContext(AuthContext)
 
+  // Create full image URL (same as ProductCard)
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/api/placeholder/80/80'
+    if (imagePath.startsWith('http')) return imagePath // External URL
+    return `http://localhost:8000${imagePath}` // Local uploaded file
+  }
+
   const handleRemoveItem = (productId) => {
     // Handle both local cart items and backend cart items
     const itemId = typeof productId === 'object' ? productId.product?.id || productId.id : productId
@@ -66,18 +73,24 @@ export default function Cart() {
                   const productPrice = product.price
                   const itemQuantity = item.quantity
                   
+                  // Use a unique key that includes cart item ID if available
+                  const uniqueKey = item.id ? `cart-${item.id}` : `product-${itemId}-${index}`
+                  
                   return (
-                    <div key={`cart-item-${itemId}-${index}`} className="flex items-center py-4 border-b border-gray-200 last:border-b-0">
+                    <div key={uniqueKey} className="flex items-center py-4 border-b border-gray-200 last:border-b-0">
                       <img 
-                        src={product.image || '/api/placeholder/80/80'} 
+                        src={getImageUrl(product.image)} 
                         alt={productName}
                         className="w-20 h-20 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.src = '/api/placeholder/80/80'
+                        }}
                       />
                       <div className="ml-4 flex-1">
                         <h3 className="text-lg font-medium text-gray-900">
                           {productName}
                         </h3>
-                        <p className="text-gray-600">${productPrice}</p>
+                        <p className="text-gray-600">৳{productPrice}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
@@ -95,7 +108,7 @@ export default function Cart() {
                         </button>
                       </div>
                       <div className="ml-4 text-lg font-medium text-gray-900">
-                        ${(productPrice * itemQuantity).toFixed(2)}
+                        ৳{(productPrice * itemQuantity).toFixed(2)}
                       </div>
                       <button
                         onClick={() => handleRemoveItem(itemId)}
@@ -111,7 +124,7 @@ export default function Cart() {
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <div className="text-xl font-bold text-gray-900">
-                    Total: ${getCartTotal().toFixed(2)}
+                    Total: ৳{getCartTotal().toFixed(2)}
                   </div>
                   <button
                     onClick={placeOrder}

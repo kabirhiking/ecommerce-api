@@ -71,3 +71,30 @@ def checkout(current_username: str = Depends(auth.get_current_user), db: Session
     crud.clear_cart(db, user.id)
     
     return order
+
+@router.post("/cleanup-duplicates")
+def cleanup_duplicate_cart_items(current_username: str = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
+    """Clean up duplicate cart items for the current user"""
+    user = crud.get_user_by_username(db, current_username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    removed_count = crud.cleanup_duplicate_cart_items(db, user.id)
+    return {"message": f"Cleaned up {removed_count} duplicate cart items"}
+    for cart_item in cart_items:
+        item_total = cart_item.product.price * cart_item.quantity
+        total_price += item_total
+        order_items.append(schemas.OrderItem(
+            product_id=cart_item.product_id,
+            quantity=cart_item.quantity,
+            price=cart_item.product.price
+        ))
+    
+    # Create order
+    order_data = schemas.OrderCreate(total_price=total_price, items=order_items)
+    order = crud.create_order(db, user.id, order_data)
+    
+    # Clear cart
+    crud.clear_cart(db, user.id)
+    
+    return order

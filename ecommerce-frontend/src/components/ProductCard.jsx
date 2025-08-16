@@ -63,11 +63,11 @@ export default function ProductCard({ product, onAdd }) {
           <div className="mb-4 lg:mb-6">
             <div className="flex flex-col mb-4">
               <span className="text-xl lg:text-2xl xl:text-3xl font-bold text-indigo-600">
-                ${product.price}
+                ৳{product.price}
               </span>
               {product.original_price && product.original_price > product.price && (
                 <span className="text-sm lg:text-base text-gray-400 line-through">
-                  ${product.original_price}
+                  ৳{product.original_price}
                 </span>
               )}
             </div>

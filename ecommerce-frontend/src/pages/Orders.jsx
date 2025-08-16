@@ -36,7 +36,7 @@ export default function Orders() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold">Order #{order.id}</h3>
-                  <p className="text-gray-600">Total: ${order.total_price?.toFixed(2) || '0.00'}</p>
+                  <p className="text-gray-600">Total: ৳{order.total_price?.toFixed(2) || '0.00'}</p>
                 </div>
                 <div className="text-sm text-gray-500">
                   {/* You could add order date here if available */}
@@ -52,12 +52,12 @@ export default function Orders() {
                         <div className="flex-1">
                           <h5 className="font-medium">{item.product?.name || `Product ID: ${item.product_id}`}</h5>
                           <p className="text-sm text-gray-600">
-                            Quantity: {item.quantity} × ${item.price?.toFixed(2) || '0.00'}
+                            Quantity: {item.quantity} × ৳{item.price?.toFixed(2) || '0.00'}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}
+                            ৳{((item.quantity || 0) * (item.price || 0)).toFixed(2)}
                           </p>
                         </div>
                       </div>

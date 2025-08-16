@@ -21,7 +21,7 @@ export default function Product() {
       <div className="product-info">
         <h2>{product.name || product.title}</h2>
         <p>{product.description}</p>
-        <div className="price">${product.price}</div>
+        <div className="price">৳{product.price}</div>
       </div>
     </div>
   )
