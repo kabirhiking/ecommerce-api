@@ -11,7 +11,7 @@ export default function Cart() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/api/placeholder/80/80'
     if (imagePath.startsWith('http')) return imagePath // External URL
-    return `http://localhost:8000${imagePath}` // Local uploaded file
+    return `http://127.0.0.1:8000${imagePath}` // Local uploaded file
   }
 
   const handleRemoveItem = (productId) => {

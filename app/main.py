@@ -12,17 +12,19 @@ app = FastAPI(title="E-Commerce API", version="1.0.0")
 # Add the CORS middleware to your app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # Allow requests from any origin (dangerous for prod!)
-    allow_credentials=True,    # Allow sending cookies/auth headers
-    allow_methods=["*"],        # Allow all HTTP methods: GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"],        # Allow all custom headers from the client
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Create uploads directory if it doesn't exist
 uploads_dir = Path("uploads")
 uploads_dir.mkdir(exist_ok=True)
 
-# Include all routers first
+# Mount static files for serving uploaded images
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
+
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(products.router)
@@ -30,9 +32,6 @@ app.include_router(orders.router)
 app.include_router(cart.router)
 app.include_router(uploads.router)
 app.include_router(admin.router)
-
-# Mount static files for serving uploaded images (after routers)
-app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 
 

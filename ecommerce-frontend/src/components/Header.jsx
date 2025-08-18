@@ -107,6 +107,19 @@ export default function Header() {
                 >
                   Orders
                 </Link>
+                {/* Admin Panel Link - Only show for admin users */}
+                {user && (user.role === 'admin' || user.role === 'super_admin') && (
+                  <Link 
+                    to="/admin" 
+                    className={`text-sm lg:text-base xl:text-lg font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                      isActive('/admin') 
+                        ? 'text-purple-600 bg-purple-50' 
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+                    }`}
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link 
                   to="/about" 
                   className={`text-sm lg:text-base xl:text-lg font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
@@ -226,6 +239,20 @@ export default function Header() {
                   >
                     Orders
                   </Link>
+                  {/* Admin Panel Link - Mobile Menu */}
+                  {user && (user.role === 'admin' || user.role === 'super_admin') && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block px-3 py-2 rounded-md text-base font-medium ${
+                        isActive('/admin') 
+                          ? 'text-purple-600 bg-purple-50' 
+                          : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
                   <div className="px-3 py-2 text-sm text-gray-700">
                     {user.full_name || user.email}
                   </div>

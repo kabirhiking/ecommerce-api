@@ -54,44 +54,27 @@ def add_to_cart(db: Session, user_id: int, item: schemas.CartItemCreate):
         models.CartItem.product_id == item.product_id
     ).first()
     
-    print(f"Adding to cart - User: {user_id}, Product: {item.product_id}, Quantity: {item.quantity}")
-    print(f"Existing item: {existing_item.quantity if existing_item else 'None'}")
-    
     if existing_item:
-        # Product already in cart, don't change quantity
-        print(f"Product already in cart, quantity remains: {existing_item.quantity}")
+        # Product already in cart, update quantity by adding the new quantity
+        existing_item.quantity += item.quantity
+        db.commit()
+        db.refresh(existing_item)
         return existing_item
     else:
-        # Double-check no item was created by another request
-        existing_check = db.query(models.CartItem).filter(
-            models.CartItem.user_id == user_id,
-            models.CartItem.product_id == item.product_id
-        ).first()
-        
-        if existing_check:
-            print(f"Found item created by another request, returning existing")
-            return existing_check
-            
-        # Create new cart item with quantity 1
-        db_item = models.CartItem(user_id=user_id, product_id=item.product_id, quantity=1)
+        # Create new cart item
+        db_item = models.CartItem(
+            user_id=user_id, 
+            product_id=item.product_id, 
+            quantity=item.quantity
+        )
         db.add(db_item)
         try:
             db.commit()
             db.refresh(db_item)
-            print(f"Created new item with quantity: {db_item.quantity}")
             return db_item
         except Exception as e:
             db.rollback()
-            # If insert failed due to duplicate, try to find the existing item
-            existing_item = db.query(models.CartItem).filter(
-                models.CartItem.user_id == user_id,
-                models.CartItem.product_id == item.product_id
-            ).first()
-            if existing_item:
-                print(f"Insert failed, returning existing item: {existing_item.quantity}")
-                return existing_item
-            else:
-                raise e
+            raise e
 
 def get_cart_items(db: Session, user_id: int):
     return db.query(models.CartItem).filter(models.CartItem.user_id == user_id).all()
