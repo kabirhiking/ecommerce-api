@@ -57,7 +57,7 @@ class Order(Base):
     total_price = Column(Float)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
     shipping_address = Column(String, nullable=True)
-    # created_at = Column(DateTime(timezone=True), server_default=func.now())  # Commented out - column missing in DB
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     user = relationship("User", back_populates="orders")

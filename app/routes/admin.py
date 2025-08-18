@@ -1,7 +1,7 @@
 # app/routes/admin.py
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_
 from typing import List, Optional
 from app import schemas, crud, database, auth, models
@@ -231,10 +231,8 @@ def list_all_orders(
     db: Session = Depends(database.get_db)
 ):
     """Get all orders with filtering"""
-    query = db.query(models.Order).options(
-        db.joinedload(models.Order.user),
-        db.joinedload(models.Order.order_items).joinedload(models.OrderItem.product)
-    )
+    # Simplified query without complex joins to debug
+    query = db.query(models.Order)
     
     if status:
         query = query.filter(models.Order.status == status)
@@ -243,6 +241,17 @@ def list_all_orders(
         query = query.filter(models.Order.user_id == user_id)
     
     orders = query.offset(skip).limit(limit).all()
+    
+    # Manually load relationships
+    for order in orders:
+        # Load user
+        order.user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        # Load order items
+        order.order_items = db.query(models.OrderItem).filter(models.OrderItem.order_id == order.id).all()
+        # Load products for each order item
+        for item in order.order_items:
+            item.product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
+    
     return orders
 
 @router.put("/orders/{order_id}/status")

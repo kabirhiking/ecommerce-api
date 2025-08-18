@@ -167,7 +167,19 @@ def get_all_orders(db: Session):
     return db.query(models.Order).all()
 
 def get_user_orders(db: Session, user_id: int):
-    return db.query(models.Order).filter(models.Order.user_id == user_id).all()
+    orders = db.query(models.Order).filter(models.Order.user_id == user_id).all()
+    
+    # Manually load relationships for each order
+    for order in orders:
+        # Load user
+        order.user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        # Load order items
+        order.order_items = db.query(models.OrderItem).filter(models.OrderItem.order_id == order.id).all()
+        # Load products for each order item
+        for item in order.order_items:
+            item.product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
+    
+    return orders
 
 
 

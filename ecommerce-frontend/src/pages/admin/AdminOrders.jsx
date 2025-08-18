@@ -165,14 +165,21 @@ export default function AdminOrders() {
               <div className="border-t pt-4">
                 <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
                 <div className="space-y-2">
-                  {order.items?.map((item, index) => (
+                  {order.order_items?.map((item, index) => (
                     <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
                       <div className="flex items-center space-x-3">
                         {item.product?.image && (
                           <img
-                            src={item.product.image}
+                            src={
+                              item.product.image.startsWith('http') 
+                                ? item.product.image 
+                                : `http://127.0.0.1:8000${item.product.image}`
+                            }
                             alt={item.product?.name}
                             className="h-10 w-10 rounded-lg object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
                           />
                         )}
                         <div>

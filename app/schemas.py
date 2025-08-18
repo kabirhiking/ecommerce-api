@@ -106,33 +106,6 @@ class OrderItemOut(BaseModel):
     class Config:
         from_attributes = True
 
-class OrderOut(BaseModel):
-    id: int
-    user_id: int
-    total_price: float
-    status: OrderStatus
-    shipping_address: Optional[str] = None
-    created_at: datetime
-    user: Optional[UserOut] = None
-    items: Optional[List[OrderItemOut]] = None
-
-    class Config:
-        from_attributes = True
-
-class OrderUpdate(BaseModel):
-    status: Optional[OrderStatus] = None
-    shipping_address: Optional[str] = None
-
-class OrderStatusUpdate(BaseModel):
-    status: OrderStatus
-    product_id: int
-    quantity: int
-    price: float
-    product: Optional[ProductOut] = None
-    
-    class Config:
-        from_attributes = True
-
 class OrderCreate(BaseModel):
     total_price: float
     shipping_address: Optional[str] = None
@@ -141,6 +114,9 @@ class OrderCreate(BaseModel):
 class OrderUpdate(BaseModel):
     status: Optional[OrderStatus] = None
     shipping_address: Optional[str] = None
+
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus
 
 class OrderOut(BaseModel):
     id: int
