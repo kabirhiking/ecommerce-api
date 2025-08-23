@@ -155,10 +155,15 @@ def list_all_products(
     search: Optional[str] = None,
     category: Optional[str] = None,
     low_stock: bool = False,
+    include_inactive: bool = False,
     db: Session = Depends(database.get_db)
 ):
     """Get all products with advanced filtering"""
     query = db.query(models.Product)
+    
+    # By default, only show active products unless explicitly requested
+    if not include_inactive:
+        query = query.filter(models.Product.is_active == True)
     
     if search:
         query = query.filter(
@@ -291,10 +296,9 @@ def get_analytics(
         models.Order.created_at >= start_date
     ).count()
     
-    # New customers
-    new_customers = db.query(models.User).filter(
-        models.User.created_at >= start_date
-    ).count() if hasattr(models.User, 'created_at') else 0
+    # New customers (users created in the date range)
+    # Note: User model doesn't have created_at field, so we'll return 0 for now
+    new_customers = 0  # db.query(models.User).filter(models.User.created_at >= start_date).count()
     
     # Average order value
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0.0
@@ -341,14 +345,18 @@ def get_analytics(
         status_distribution[status.value] = count
     
     # Recent activities (mock data for now)
-    recent_activities = [
-        {
+    recent_activities = []
+    recent_orders = db.query(models.Order).order_by(models.Order.created_at.desc()).limit(5).all()
+    
+    for order in recent_orders:
+        # Manually load user for each order
+        user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        description = f"New order #{order.id} placed by {user.username}" if user else f"New order #{order.id}"
+        recent_activities.append({
             "type": "order",
-            "description": f"New order #{order.id} placed by {order.user.username}" if order.user else f"New order #{order.id}",
+            "description": description,
             "timestamp": order.created_at.isoformat()
-        }
-        for order in db.query(models.Order).options(db.joinedload(models.Order.user)).order_by(models.Order.created_at.desc()).limit(5).all()
-    ]
+        })
     
     return schemas.AnalyticsData(
         total_revenue=total_revenue,
@@ -420,3 +428,261 @@ def get_top_products(
         }
         for result in results
     ]
+
+# Additional Analytics Endpoints
+
+@router.get("/analytics/sales-trend")
+def get_sales_trend(
+    days: int = 30,
+    db: Session = Depends(database.get_db)
+):
+    """Get daily sales trend for the specified number of days"""
+    from datetime import datetime, timedelta
+    
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Daily sales data
+    daily_sales = db.query(
+        func.date(models.Order.created_at).label('date'),
+        func.count(models.Order.id).label('orders'),
+        func.sum(models.Order.total_price).label('revenue')
+    ).filter(
+        models.Order.created_at >= start_date,
+        models.Order.status != OrderStatus.CANCELLED
+    ).group_by(
+        func.date(models.Order.created_at)
+    ).order_by(
+        func.date(models.Order.created_at)
+    ).all()
+    
+    return [
+        {
+            "date": str(sale.date),
+            "orders": sale.orders,
+            "revenue": float(sale.revenue or 0)
+        }
+        for sale in daily_sales
+    ]
+
+@router.get("/analytics/customer-stats")
+def get_customer_stats(
+    days: int = 30,
+    db: Session = Depends(database.get_db)
+):
+    """Get customer statistics"""
+    from datetime import datetime, timedelta
+    
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Total customers
+    total_customers = db.query(models.User).filter(
+        models.User.role == models.UserRole.USER
+    ).count()
+    
+    # New customers in period (User model doesn't have created_at)
+    new_customers = 0  # db.query(models.User).filter(models.User.created_at >= start_date, models.User.role == models.UserRole.USER).count()
+    
+    # Active customers (customers who placed orders in period)
+    active_customers = db.query(models.User).join(
+        models.Order, models.User.id == models.Order.user_id
+    ).filter(
+        models.Order.created_at >= start_date
+    ).distinct().count()
+    
+    # Top customers by orders
+    top_customers = db.query(
+        models.User.id,
+        models.User.username,
+        models.User.email,
+        func.count(models.Order.id).label('total_orders'),
+        func.sum(models.Order.total_price).label('total_spent')
+    ).join(
+        models.Order, models.User.id == models.Order.user_id
+    ).filter(
+        models.Order.created_at >= start_date,
+        models.Order.status != OrderStatus.CANCELLED
+    ).group_by(
+        models.User.id, models.User.username, models.User.email
+    ).order_by(
+        func.sum(models.Order.total_price).desc()
+    ).limit(10).all()
+    
+    return {
+        "total_customers": total_customers,
+        "new_customers": new_customers,
+        "active_customers": active_customers,
+        "customer_retention_rate": (active_customers / total_customers * 100) if total_customers > 0 else 0,
+        "top_customers": [
+            {
+                "id": customer.id,
+                "username": customer.username,
+                "email": customer.email,
+                "total_orders": customer.total_orders,
+                "total_spent": float(customer.total_spent or 0)
+            }
+            for customer in top_customers
+        ]
+    }
+
+@router.get("/analytics/inventory-stats")
+def get_inventory_stats(
+    db: Session = Depends(database.get_db)
+):
+    """Get inventory and product statistics"""
+    
+    # Total products
+    total_products = db.query(models.Product).count()
+    
+    # Low stock products (quantity < 10)
+    low_stock_products = db.query(models.Product).filter(
+        models.Product.quantity < 10
+    ).count()
+    
+    # Out of stock products
+    out_of_stock_products = db.query(models.Product).filter(
+        models.Product.quantity == 0
+    ).count()
+    
+    # Average product price
+    avg_product_price = db.query(func.avg(models.Product.price)).scalar() or 0
+    
+    # Total inventory value
+    total_inventory_value = db.query(
+        func.sum(models.Product.price * models.Product.quantity)
+    ).scalar() or 0
+    
+    # Products by category (if category field exists)
+    products_by_category = {}
+    try:
+        category_stats = db.query(
+            models.Product.category,
+            func.count(models.Product.id).label('count')
+        ).group_by(models.Product.category).all()
+        
+        products_by_category = {
+            stat.category or 'Uncategorized': stat.count 
+            for stat in category_stats
+        }
+    except:
+        # Category field might not exist
+        products_by_category = {"All Products": total_products}
+    
+    return {
+        "total_products": total_products,
+        "low_stock_products": low_stock_products,
+        "out_of_stock_products": out_of_stock_products,
+        "average_product_price": float(avg_product_price),
+        "total_inventory_value": float(total_inventory_value),
+        "products_by_category": products_by_category
+    }
+
+# Review Management
+@router.get("/reviews")
+def list_all_reviews(
+    skip: int = 0,
+    limit: int = 100,
+    is_approved: Optional[bool] = None,
+    product_id: Optional[int] = None,
+    db: Session = Depends(database.get_db)
+):
+    """Get all reviews with filtering for admin moderation"""
+    
+    query = db.query(models.Review)
+    
+    if is_approved is not None:
+        query = query.filter(models.Review.is_approved == is_approved)
+    
+    if product_id:
+        query = query.filter(models.Review.product_id == product_id)
+    
+    reviews = query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
+    
+    # Add user and product info
+    for review in reviews:
+        user = db.query(models.User).filter(models.User.id == review.user_id).first()
+        product = db.query(models.Product).filter(models.Product.id == review.product_id).first()
+        
+        if user:
+            review.user = {"id": user.id, "username": user.username, "email": user.email}
+        if product:
+            review.product = {"id": product.id, "name": product.name}
+    
+    return reviews
+
+@router.put("/reviews/{review_id}/approve")
+def approve_review(
+    review_id: int,
+    db: Session = Depends(database.get_db)
+):
+    """Approve or disapprove a review"""
+    
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    review.is_approved = not review.is_approved
+    db.commit()
+    
+    status = "approved" if review.is_approved else "disapproved"
+    return {"message": f"Review {status} successfully"}
+
+@router.delete("/reviews/{review_id}")
+def delete_review_admin(
+    review_id: int,
+    db: Session = Depends(database.get_db)
+):
+    """Delete a review (admin only)"""
+    
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    db.delete(review)
+    db.commit()
+    
+    return {"message": "Review deleted successfully"}
+
+@router.get("/reviews/stats")
+def get_review_stats(
+    db: Session = Depends(database.get_db)
+):
+    """Get review statistics for admin dashboard"""
+    
+    total_reviews = db.query(models.Review).count()
+    pending_reviews = db.query(models.Review).filter(models.Review.is_approved == False).count()
+    approved_reviews = db.query(models.Review).filter(models.Review.is_approved == True).count()
+    
+    # Average rating across all products
+    avg_rating = db.query(func.avg(models.Review.rating)).filter(models.Review.is_approved == True).scalar() or 0
+    
+    # Most reviewed products
+    top_reviewed_products = db.query(
+        models.Product.id,
+        models.Product.name,
+        func.count(models.Review.id).label('review_count'),
+        func.avg(models.Review.rating).label('avg_rating')
+    ).join(
+        models.Review, models.Product.id == models.Review.product_id
+    ).filter(
+        models.Review.is_approved == True
+    ).group_by(
+        models.Product.id, models.Product.name
+    ).order_by(
+        func.count(models.Review.id).desc()
+    ).limit(5).all()
+    
+    return {
+        "total_reviews": total_reviews,
+        "pending_reviews": pending_reviews,
+        "approved_reviews": approved_reviews,
+        "average_rating": float(avg_rating),
+        "top_reviewed_products": [
+            {
+                "product_id": p.id,
+                "product_name": p.name,
+                "review_count": p.review_count,
+                "average_rating": float(p.avg_rating)
+            }
+            for p in top_reviewed_products
+        ]
+    }

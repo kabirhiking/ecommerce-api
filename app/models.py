@@ -35,6 +35,7 @@ class User(Base):
 
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
+    reviews = relationship("Review", back_populates="user")
 
 class Product(Base):
     __tablename__ = "products"
@@ -49,6 +50,9 @@ class Product(Base):
     is_active = Column(Boolean, default=True)
     # created_at = Column(DateTime(timezone=True), server_default=func.now())  # Commented out - column missing in DB
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    reviews = relationship("Review", back_populates="product")
 
 class Order(Base):
     __tablename__ = "orders"
@@ -83,3 +87,19 @@ class CartItem(Base):
 
     user = relationship("User", back_populates="cart_items")
     product = relationship("Product")
+
+class Review(Base):
+    __tablename__ = "reviews"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    product_id = Column(Integer, ForeignKey("products.id"))
+    rating = Column(Integer)  # 1-5 stars
+    title = Column(String, nullable=True)
+    comment = Column(String, nullable=True)
+    is_approved = Column(Boolean, default=True)  # For admin moderation
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="reviews")
+    product = relationship("Product", back_populates="reviews")

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -173,10 +173,43 @@ class ErrorResponse(BaseModel):
     detail: str
     
     class Config:
-     from_attributes = True
-           
-           
-class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
-    password: Optional[str] = None
+        from_attributes = True
+
+# Review schemas
+class ReviewCreate(BaseModel):
+    product_id: int
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5 stars")
+    title: Optional[str] = None
+    comment: Optional[str] = None
+
+class ReviewUpdate(BaseModel):
+    rating: Optional[int] = Field(None, ge=1, le=5)
+    title: Optional[str] = None
+    comment: Optional[str] = None
+    is_approved: Optional[bool] = None
+
+class ReviewOut(BaseModel):
+    id: int
+    user_id: int
+    product_id: int
+    rating: int
+    title: Optional[str] = None
+    comment: Optional[str] = None
+    is_approved: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # User info (to display reviewer name)
+    user: Optional[dict] = None
+    
+    class Config:
+        from_attributes = True
+
+class ProductReviewSummary(BaseModel):
+    product_id: int
+    total_reviews: int
+    average_rating: float
+    rating_distribution: dict  # {1: count, 2: count, ...}
+    
+    class Config:
+        from_attributes = True
