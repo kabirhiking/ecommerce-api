@@ -2,6 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hero Section Custom Animations */
+@keyframes slide-left {
+  0% {
+    transform: translateX(100px);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-200px);
+    opacity: 0.1;
+  }
+}
+
+@keyframes slide-left-slow {
+  0% {
+    transform: translateX(150px) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+    transform: translateX(50px) rotate(180deg);
+  }
+  100% {
+    transform: translateX(-250px) rotate(360deg);
+    opacity: 0.1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-left {
+  animation: slide-left 8s ease-in-out infinite;
+}
+
+.animate-slide-left-slow {
+  animation: slide-left-slow 12s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
 /* Custom component styles */
 @layer components {
   .btn-primary {

@@ -9,6 +9,7 @@ export default function AdminProducts() {
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showInactive, setShowInactive] = useState(false)
   const { user } = useContext(AuthContext)
 
   // Form state
@@ -41,10 +42,19 @@ export default function AdminProducts() {
     fetchProducts()
   }, [])
 
+  useEffect(() => {
+    fetchProducts()
+  }, [showInactive])
+
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/admin/products')
+      // Add timestamp to prevent caching issues and include inactive products if requested
+      const params = new URLSearchParams({
+        t: Date.now().toString(),
+        include_inactive: showInactive.toString()
+      })
+      const response = await api.get(`/admin/products?${params}`)
       setProducts(response.data)
       setError(null)
     } catch (err) {
@@ -213,11 +223,24 @@ export default function AdminProducts() {
     if (!confirm('Are you sure you want to delete this product?')) return
 
     try {
+      // Optimistically remove from UI first
+      setProducts(prevProducts => prevProducts.filter(p => p.id !== productId))
+      
+      // Delete from backend
       await api.delete(`/admin/products/${productId}`)
+      
+      // Show success message
+      alert('Product deleted successfully!')
+      
+      // Refresh from server to ensure consistency
       await fetchProducts()
     } catch (err) {
       console.error('Error deleting product:', err)
       setError('Failed to delete product')
+      alert('Failed to delete product. Please try again.')
+      
+      // Refresh to restore original state if delete failed
+      await fetchProducts()
     }
   }
 
@@ -258,17 +281,29 @@ export default function AdminProducts() {
               <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
               <p className="text-gray-600 mt-1">Manage your store's products</p>
             </div>
-            <button
-              onClick={() => openModal()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
-            >
-              Add Product
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={fetchProducts}
+                disabled={loading}
+                className="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+              <button
+                onClick={() => openModal()}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
+              >
+                Add Product
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
           <input
             type="text"
             placeholder="Search products..."
@@ -276,6 +311,29 @@ export default function AdminProducts() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
+          
+          {/* Show inactive products toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                  className="sr-only"
+                />
+                <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${showInactive ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showInactive ? 'translate-x-6' : 'translate-x-1'}`} />
+                </div>
+                <span className="ml-3 text-sm text-gray-700">
+                  Show inactive/deleted products
+                </span>
+              </label>
+            </div>
+            <div className="text-sm text-gray-500">
+              Showing {filteredProducts.length} products
+            </div>
+          </div>
         </div>
 
         {/* Error Display */}
@@ -333,8 +391,13 @@ export default function AdminProducts() {
                           />
                         )}
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className={`text-sm font-medium ${product.is_active ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
                             {product.name}
+                            {!product.is_active && (
+                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Deleted
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">
                             SKU: {product.sku || 'N/A'}

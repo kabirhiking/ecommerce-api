@@ -3,18 +3,16 @@ import { useSearchParams } from 'react-router-dom'
 import api from '../api'
 import ProductCard from '../components/ProductCard'
 import { AuthContext } from '../contexts/AuthContext'
-import { CartContext } from '../contexts/CartContext'
 
 export default function Products() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+  const searchTerm = searchParams.get('search') || '' // Get search from URL
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'name')
   const [filterBy, setFilterBy] = useState(searchParams.get('category') || '')
   
   const { user } = useContext(AuthContext)
-  const { addToCart } = useContext(CartContext)
 
   useEffect(() => {
     fetchProducts()
@@ -23,11 +21,11 @@ export default function Products() {
   useEffect(() => {
     // Update URL params when filters change
     const params = new URLSearchParams()
-    if (searchTerm) params.set('search', searchTerm)
+    if (searchTerm) params.set('search', searchTerm) // Keep existing search from navbar
     if (sortBy !== 'name') params.set('sort', sortBy)
     if (filterBy) params.set('category', filterBy)
     setSearchParams(params)
-  }, [searchTerm, sortBy, filterBy, setSearchParams])
+  }, [sortBy, filterBy, setSearchParams]) // Removed searchTerm from dependency
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -38,22 +36,6 @@ export default function Products() {
       console.error(err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleAddToCart = async (product) => {
-    if (!user) {
-      alert('You must login to add to cart')
-      return
-    }
-
-    try {
-      addToCart(product)
-      await api.post('/cart/add', { product_id: product.id, quantity: 1 })
-      alert('Added to cart successfully!')
-    } catch (e) {
-      console.error(e)
-      alert('Added to cart locally')
     }
   }
 
@@ -93,59 +75,59 @@ export default function Products() {
           </p>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8 xl:p-10 mb-8 lg:mb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 xl:gap-8">
-            {/* Search */}
-            <div>
-              <label htmlFor="search" className="block text-sm lg:text-base xl:text-lg font-medium text-gray-700 mb-2 lg:mb-3">
-                Search Products
-              </label>
-              <input
-                id="search"
-                type="text"
-                placeholder="Search by name or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4 border border-gray-300 rounded-md text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              />
+        {/* Filters and Controls */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8 mb-8 lg:mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 lg:gap-6">
+            {/* Left side - Results count */}
+            <div className="flex items-center">
+              <h3 className="text-lg lg:text-xl font-medium text-gray-900">
+                {filteredProducts.length} Products Found
+                {searchTerm && (
+                  <span className="text-indigo-600 ml-2">
+                    for "{searchTerm}"
+                  </span>
+                )}
+              </h3>
             </div>
 
-            {/* Sort */}
-            <div>
-              <label htmlFor="sort" className="block text-sm lg:text-base xl:text-lg font-medium text-gray-700 mb-2 lg:mb-3">
-                Sort By
-              </label>
-              <select
-                id="sort"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4 border border-gray-300 rounded-md text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="name">Name (A-Z)</option>
-                <option value="price-low">Price (Low to High)</option>
-                <option value="price-high">Price (High to Low)</option>
-              </select>
-            </div>
+            {/* Right side - Sort and Filter */}
+            <div className="flex flex-col sm:flex-row gap-4 lg:gap-6">
+              {/* Sort */}
+              <div className="min-w-0 sm:min-w-[200px]">
+                <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-2">
+                  Sort By
+                </label>
+                <select
+                  id="sort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="name">Name (A-Z)</option>
+                  <option value="price-low">Price (Low to High)</option>
+                  <option value="price-high">Price (High to Low)</option>
+                </select>
+              </div>
 
-            {/* Category Filter */}
-            <div>
-              <label htmlFor="category" className="block text-sm lg:text-base xl:text-lg font-medium text-gray-700 mb-2 lg:mb-3">
-                Category
-              </label>
-              <select
-                id="category"
-                value={filterBy}
-                onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full px-3 py-2 lg:px-4 lg:py-3 xl:px-5 xl:py-4 border border-gray-300 rounded-md text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+              {/* Category Filter */}
+              <div className="min-w-0 sm:min-w-[200px]">
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  Category
+                </label>
+                <select
+                  id="category"
+                  value={filterBy}
+                  onChange={(e) => setFilterBy(e.target.value)}
+                  className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -209,8 +191,7 @@ export default function Products() {
             {filteredProducts.map(product => (
               <ProductCard 
                 key={product.id} 
-                product={product} 
-                onAdd={handleAddToCart} 
+                product={product}
               />
             ))}
           </div>

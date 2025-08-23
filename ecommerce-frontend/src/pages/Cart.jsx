@@ -70,8 +70,8 @@ export default function Cart() {
                   const product = item.product || item
                   const itemId = product.id
                   const productName = product.name || product.title
-                  const productPrice = product.price
-                  const itemQuantity = item.quantity
+                  const productPrice = parseFloat(product.price) || 0
+                  const itemQuantity = item.quantity || 0
                   
                   // Use a unique key that includes cart item ID if available
                   const uniqueKey = item.id ? `cart-${item.id}` : `product-${itemId}-${index}`
@@ -90,7 +90,7 @@ export default function Cart() {
                         <h3 className="text-lg font-medium text-gray-900">
                           {productName}
                         </h3>
-                        <p className="text-gray-600">৳{productPrice}</p>
+                        <p className="text-gray-600">৳{productPrice.toFixed(2)}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button

@@ -63,61 +63,73 @@ export default function Header() {
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Single Row - Navigation Links + User Menu Together (Right Aligned) */}
-        <div className="hidden md:flex items-center justify-end py-3 border-b border-gray-100">
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-6 lg:space-x-8">
-            <Link 
-              to="/" 
-              className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
-                isActive('/') 
-                  ? 'text-indigo-600 bg-indigo-50' 
-                  : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
-              }`}
-            >
-              Home
-            </Link>
-            <button 
-              onClick={handleProductsClick}
-              className="text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
-            >
-              Products
-            </button>
-            
-            {user && (
-              <>
-                <Link 
-                  to="/orders" 
-                  className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
-                    isActive('/orders') 
-                      ? 'text-indigo-600 bg-indigo-50' 
-                      : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
-                  }`}
-                >
-                  Orders
-                </Link>
-                {user && (user.role === 'admin' || user.role === 'super_admin') && (
-                  <Link 
-                    to="/admin" 
-                    className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
-                      isActive('/admin') 
-                        ? 'text-purple-600 bg-purple-50' 
-                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
-                    }`}
-                  >
-                    Admin
-                  </Link>
-                )}
-              </>
-            )}
+        {/* Main Header Row - Logo, Search, Cart, User */}
+        <div className="flex items-center justify-between py-4 lg:py-6">
+          {/* Logo */}
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <div className="text-2xl lg:text-3xl font-bold text-indigo-600">
+              🛒 E-Shop
+            </div>
+          </Link>
 
+          {/* Search Bar - Desktop Center */}
+          <div className="hidden md:flex flex-1 max-w-2xl mx-4 lg:mx-8">
+            <form onSubmit={handleSearch} className="w-full">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search in E-Shop..."
+                  className="w-full px-4 py-3 pl-12 pr-12 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all duration-200 text-base"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <button
+                  type="submit"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                >
+                  <div className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+            </form>
           </div>
 
-          {/* User Menu - */}
-          <div className="flex items-center space-x-3 lg:space-x-4 ml-8 lg:ml-12">
+          {/* Right Side - Cart & User Menu */}
+          <div className="flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
+            {/* Cart Icon */}
+            {user && (
+              <Link 
+                to="/cart" 
+                className={`relative flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  isActive('/cart') 
+                    ? 'text-indigo-600 bg-indigo-50' 
+                    : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                }`}
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5-5M7 13l-2.5 5M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
+                <span className="hidden lg:inline text-sm">Cart</span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {/* User Menu */}
             {user ? (
               <>
-                <div className="flex items-center space-x-2 lg:space-x-3">
+                <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
                   <div className="w-8 h-8 lg:w-10 lg:h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                     <span className="text-sm lg:text-base font-medium text-indigo-600">
                       {(user.full_name || user.email || 'U').charAt(0).toUpperCase()}
@@ -129,7 +141,7 @@ export default function Header() {
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="bg-red-500 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-md text-sm lg:text-base font-medium hover:bg-red-600 transition-all duration-200"
+                  className="hidden md:block bg-red-500 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-md text-sm lg:text-base font-medium hover:bg-red-600 transition-all duration-200"
                 >
                   Logout
                 </button>
@@ -138,119 +150,92 @@ export default function Header() {
               <>
                 <Link 
                   to="/login" 
-                  className="text-gray-600 hover:text-indigo-600 text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 hover:bg-indigo-50 rounded-lg"
+                  className="hidden md:block text-gray-600 hover:text-indigo-600 text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 hover:bg-indigo-50 rounded-lg"
                 >
                   Login
                 </Link>
                 <Link 
                   to="/register" 
-                  className="bg-indigo-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-md text-sm lg:text-base font-medium hover:bg-indigo-700 transition-all duration-200"
+                  className="hidden md:block bg-indigo-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-md text-sm lg:text-base font-medium hover:bg-indigo-700 transition-all duration-200"
                 >
                   Register
                 </Link>
               </>
             )}
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center space-x-2">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Main Row - Logo Left, Search + Cart Center */}
-        <div className="flex items-center py-2 relative">
-          {/* Logo - Left */}
-          <Link to="/" className="flex items-center flex-shrink-0">
-            <div className="text-2xl lg:text-3xl font-bold text-indigo-600">
-              🛒 E-Shop
-            </div>
+        {/* Secondary Navigation - Below main header */}
+        <div className="hidden md:flex items-center justify-center space-x-6 lg:space-x-8 pb-4 border-b border-gray-100">
+          <Link 
+            to="/" 
+            className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+              isActive('/') 
+                ? 'text-indigo-600 bg-indigo-50' 
+                : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+            }`}
+          >
+            Home
           </Link>
-
-          {/* Search Bar + Cart - Center (close to each other) */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
-            {/* Search Bar */}
-            <div className="hidden md:flex">
-              <form onSubmit={handleSearch} className="w-full">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search in E-Shop..."
-                    className="w-[700px] px-3 py-2.5 pl-10 pr-10 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all duration-200 text-base"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <button
-                    type="submit"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <div className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Cart - close to each other */}
-            <div className="flex items-center">
-              {/* Cart Icon */}
-              {user && (
+          <button 
+            onClick={handleProductsClick}
+            className="text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
+          >
+            Products
+          </button>
+          
+          {user && (
+            <>
+              <Link 
+                to="/orders" 
+                className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                  isActive('/orders') 
+                    ? 'text-indigo-600 bg-indigo-50' 
+                    : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                }`}
+              >
+                Orders
+              </Link>
+              {user && (user.role === 'admin' || user.role === 'super_admin') && (
                 <Link 
-                  to="/cart" 
-                  className={`relative flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 ${
-                    isActive('/cart') 
-                      ? 'text-indigo-600 bg-indigo-50' 
-                      : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                  to="/admin" 
+                  className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                    isActive('/admin') 
+                      ? 'text-purple-600 bg-purple-50' 
+                      : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
                   }`}
                 >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5-5M7 13l-2.5 5M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z" />
-                  </svg>
-                  <span className="hidden lg:inline text-sm font-medium">Cart</span>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                      {cartItemCount}
-                    </span>
-                  )}
+                  Admin
                 </Link>
               )}
-
-              {/* Mobile Menu Button */}
-              <div className="md:hidden flex items-center ml-2">
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 p-2"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {isMobileMenuOpen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button - Right Side */}
-          <div className="md:hidden ml-auto">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 p-2"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
+              <Link 
+                to="/about" 
+                className={`text-sm lg:text-base font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                  isActive('/about') 
+                    ? 'text-indigo-600 bg-indigo-50' 
+                    : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                }`}
+              >
+                About Us
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Navigation */}
@@ -346,7 +331,17 @@ export default function Header() {
                       👨‍💼 Admin Panel
                     </Link>
                   )}
-
+                  <Link
+                    to="/about"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
+                      isActive('/about') 
+                        ? 'text-indigo-600 bg-indigo-50 border-l-4 border-indigo-600' 
+                        : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    ℹ️ About Us
+                  </Link>
                   
                   {/* User Info Section */}
                   <div className="border-t border-gray-200 pt-3 mt-3">

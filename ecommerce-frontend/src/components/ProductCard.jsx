@@ -1,23 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-export default function ProductCard({ product, onAdd }) {
-  const [isAdding, setIsAdding] = React.useState(false)
-  
-  const handleAddToCart = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (isAdding) return // Prevent double clicks
-    
-    setIsAdding(true)
-    try {
-      await onAdd(product)
-    } finally {
-      setIsAdding(false)
-    }
-  }
-
+export default function ProductCard({ product }) {
   // Create full image URL
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/api/placeholder/300/300'
@@ -32,53 +16,53 @@ export default function ProductCard({ product, onAdd }) {
           <img 
             src={getImageUrl(product.image)} 
             alt={product.name || product.title}
-            className="w-full h-48 sm:h-56 lg:h-64 xl:h-72 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-40 sm:h-44 lg:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               e.target.src = '/api/placeholder/300/300'
             }}
           />
           {(product.quantity || product.stock) <= 5 && (product.quantity || product.stock) > 0 && (
-            <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 lg:px-3 lg:py-2 rounded text-xs lg:text-sm font-medium">
+            <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
               Only {product.quantity || product.stock} left
             </div>
           )}
           {(product.quantity || product.stock) === 0 && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 lg:px-3 lg:py-2 rounded text-xs lg:text-sm font-medium">
+            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
               Out of Stock
             </div>
           )}
         </div>
         
-        <div className="p-4 lg:p-6 xl:p-8">
-          <h3 className="text-lg lg:text-xl xl:text-2xl font-semibold text-gray-900 mb-2 lg:mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-200">
+        <div className="p-3 lg:p-4">
+          <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-1 lg:mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-200">
             {product.name || product.title}
           </h3>
           
           {product.description && (
-            <p className="text-gray-600 text-sm lg:text-base mb-3 lg:mb-4 line-clamp-2">
+            <p className="text-gray-600 text-sm mb-2 lg:mb-3 line-clamp-2">
               {product.description}
             </p>
           )}
           
-          <div className="mb-4 lg:mb-6">
-            <div className="flex flex-col mb-4">
-              <span className="text-xl lg:text-2xl xl:text-3xl font-bold text-indigo-600">
+          <div className="mb-3 lg:mb-4">
+            <div className="flex flex-col mb-2">
+              <span className="text-lg lg:text-xl font-bold text-indigo-600">
                 ৳{product.price}
               </span>
               {product.original_price && product.original_price > product.price && (
-                <span className="text-sm lg:text-base text-gray-400 line-through">
+                <span className="text-sm text-gray-400 line-through">
                   ৳{product.original_price}
                 </span>
               )}
             </div>
             
             {product.rating && (
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-2">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <svg
                       key={i}
-                      className={`w-4 h-4 lg:w-5 lg:h-5 ${
+                      className={`w-3 h-3 lg:w-4 lg:h-4 ${
                         i < Math.floor(product.rating) 
                           ? 'text-yellow-400' 
                           : 'text-gray-300'
@@ -90,27 +74,23 @@ export default function ProductCard({ product, onAdd }) {
                     </svg>
                   ))}
                 </div>
-                <span className="ml-2 text-sm lg:text-base text-gray-600">
+                <span className="ml-1 text-xs lg:text-sm text-gray-600">
                   ({product.rating.toFixed(1)})
                 </span>
               </div>
             )}
             
-            <button
-              onClick={handleAddToCart}
-              disabled={(product.quantity || product.stock) === 0 || isAdding}
-              className={`w-full px-4 py-2 lg:px-6 lg:py-3 xl:px-8 xl:py-4 rounded-lg font-medium text-sm lg:text-base transition-all duration-200 transform hover:scale-105 active:scale-95 ${
-                (product.quantity || product.stock) === 0 || isAdding
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 shadow-md hover:shadow-lg'
-              }`}
-            >
-              {(product.quantity || product.stock) === 0 
-                ? 'Out of Stock' 
-                : isAdding 
-                  ? 'Adding...' 
-                  : 'Add to Cart'}
-            </button>
+            {/* Stock Status */}
+            {(product.quantity || product.stock) <= 5 && (product.quantity || product.stock) > 0 && (
+              <div className="text-orange-600 text-xs font-medium mt-1">
+                Only {product.quantity || product.stock} left
+              </div>
+            )}
+            {(product.quantity || product.stock) === 0 && (
+              <div className="text-red-600 text-xs font-medium mt-1">
+                Out of Stock
+              </div>
+            )}
           </div>
         </div>
       </Link>

@@ -11,7 +11,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Orders from './pages/Orders'
-import About from './components/About'
+
 // Admin Components
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminUsers from './pages/admin/AdminUsers'
@@ -34,7 +34,7 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
-              <Route path="/about" element={<About />} />
+              
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />

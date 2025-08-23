@@ -143,7 +143,7 @@ export default function AdminOrders() {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-gray-900">
-                    ${order.total_price?.toFixed(2)}
+                    ৳{order.total_price?.toFixed(2)}
                   </div>
                   <div className="mt-2">
                     <select
@@ -192,7 +192,7 @@ export default function AdminOrders() {
                         </div>
                       </div>
                       <div className="text-sm font-medium text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ৳{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   )) || (
