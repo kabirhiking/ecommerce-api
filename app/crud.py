@@ -207,15 +207,83 @@ def delete_product(db: Session, product_id: int):
 def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
     db_user = get_user_by_id(db, user_id)
     if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return None
 
-    if user.username:
-        db_user.username = user.username
-    if user.email:
+    if user.email is not None:
         db_user.email = user.email
-    if user.password:
-        db_user.hashed_password = auth.hash_password(user.password)
-
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
+    if user.phone is not None:
+        db_user.phone = user.phone
+    if user.address is not None:
+        db_user.address = user.address
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+# Address CRUD functions
+def get_user_addresses(db: Session, user_id: int):
+    return db.query(models.Address).filter(models.Address.user_id == user_id).all()
+
+def get_address_by_id(db: Session, address_id: int, user_id: int):
+    return db.query(models.Address).filter(
+        models.Address.id == address_id,
+        models.Address.user_id == user_id
+    ).first()
+
+def create_address(db: Session, user_id: int, address: schemas.AddressCreate):
+    # If this is set as default, unset all other default addresses for this user
+    if address.is_default:
+        db.query(models.Address).filter(models.Address.user_id == user_id).update(
+            {"is_default": False}
+        )
+    
+    db_address = models.Address(
+        user_id=user_id,
+        full_name=address.full_name,
+        phone=address.phone,
+        address=address.address,
+        postcode=address.postcode,
+        is_default=address.is_default
+    )
+    db.add(db_address)
+    db.commit()
+    db.refresh(db_address)
+    return db_address
+
+def update_address(db: Session, address_id: int, user_id: int, address: schemas.AddressUpdate):
+    db_address = get_address_by_id(db, address_id, user_id)
+    if not db_address:
+        return None
+    
+    # If this is being set as default, unset all other default addresses for this user
+    if address.is_default:
+        db.query(models.Address).filter(models.Address.user_id == user_id).update(
+            {"is_default": False}
+        )
+    
+    if address.full_name is not None:
+        db_address.full_name = address.full_name
+    if address.phone is not None:
+        db_address.phone = address.phone
+    if address.address is not None:
+        db_address.address = address.address
+    if address.postcode is not None:
+        db_address.postcode = address.postcode
+    if address.is_default is not None:
+        db_address.is_default = address.is_default
+    
+    db.commit()
+    db.refresh(db_address)
+    return db_address
+
+def delete_address(db: Session, address_id: int, user_id: int):
+    db_address = get_address_by_id(db, address_id, user_id)
+    if not db_address:
+        return False
+    db.delete(db_address)
+    db.commit()
+    return True

@@ -11,6 +11,13 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Orders from './pages/Orders'
+import Profile from './pages/Profile'
+import MyOrders from './pages/MyOrders'
+import MyAddresses from './pages/MyAddresses'
+import MyReviews from './pages/MyReviews'
+import Wishlist from './pages/Wishlist'
+import PaymentMethods from './pages/PaymentMethods'
+import Notifications from './pages/Notifications'
 
 // Admin Components
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -35,8 +42,14 @@ export default function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
               
-              
-              {/* Admin Routes */}
+              {/* User Account Routes */}
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/addresses" element={<MyAddresses />} />
+            <Route path="/my-reviews" element={<MyReviews />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/payment-methods" element={<PaymentMethods />} />
+            <Route path="/notifications" element={<Notifications />} />              {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminUsers />} />

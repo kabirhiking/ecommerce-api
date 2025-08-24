@@ -33,6 +33,11 @@ class UserUpdate(BaseModel):
     address: Optional[str] = None
     is_active: Optional[bool] = None
 
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    mobile: Optional[str] = None
+
 class UserOut(BaseModel):
     id: int
     username: str
@@ -43,7 +48,6 @@ class UserOut(BaseModel):
     last_name: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
-    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -210,6 +214,36 @@ class ProductReviewSummary(BaseModel):
     total_reviews: int
     average_rating: float
     rating_distribution: dict  # {1: count, 2: count, ...}
+    
+    class Config:
+        from_attributes = True
+
+
+# Address schemas
+class AddressCreate(BaseModel):
+    full_name: str
+    phone: str
+    address: str
+    postcode: str
+    is_default: Optional[bool] = False
+
+class AddressUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    postcode: Optional[str] = None
+    is_default: Optional[bool] = None
+
+class AddressOut(BaseModel):
+    id: int
+    user_id: int
+    full_name: str
+    phone: str
+    address: str
+    postcode: str
+    is_default: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

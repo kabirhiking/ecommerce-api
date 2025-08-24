@@ -36,6 +36,7 @@ class User(Base):
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
     reviews = relationship("Review", back_populates="user")
+    addresses = relationship("Address", back_populates="user")
 
 class Product(Base):
     __tablename__ = "products"
@@ -103,3 +104,19 @@ class Review(Base):
     # Relationships
     user = relationship("User", back_populates="reviews")
     product = relationship("Product", back_populates="reviews")
+
+
+class Address(Base):
+    __tablename__ = "addresses"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    full_name = Column(String)
+    phone = Column(String)
+    address = Column(String)
+    postcode = Column(String)
+    is_default = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship
+    user = relationship("User", back_populates="addresses")
