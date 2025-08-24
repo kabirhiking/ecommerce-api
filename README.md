@@ -45,12 +45,18 @@ Here is the quick peack at E-Shop!
 ![Login](screenshots/login.png)
 *Clean login and registration interface with form validation*
 
+### 👤 Admin page
+![alt text](screenshots/admin.png)
 ### 🏠 Homepage
 ![Homepage](screenshots/homepage.png)
 *Modern landing page with hero section, featured products, and smooth navigation*
 
+![Product Mangagement](screenshots/p-management.png)
+
+
 ### 📦 Product Listing
-![Products](screenshots/products.png)
+![Products](screenshots/p-product.png)
+
 *Grid layout of products with search functionality and responsive design*
 
 ### 🛒 Shopping Cart
@@ -59,11 +65,14 @@ Here is the quick peack at E-Shop!
 
 
 ### 📋 Order History
-![Orders](screenshots/orders.png)
+![alt text](image.png)
+![Orders](screenshots/p-management.png)
 *User order tracking with detailed order information and status*
 
-### 📱 Mobile Responsive
-![Mobile View](screenshots/mobile.png)
+### 📱 User-management
+
+
+![User-management](screenshots/u-management.png)
 *Fully responsive design that works perfectly on mobile devices*
 
 ### 📊 API Documentation
