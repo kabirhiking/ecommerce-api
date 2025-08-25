@@ -33,7 +33,7 @@ export default function Product() {
 
   const handleAddToCart = async () => {
     try {
-      await addToCart(product.id, 1)
+      await addToCart(product)
       alert('Product added to cart!')
     } catch (error) {
       console.error('Error adding to cart:', error)
